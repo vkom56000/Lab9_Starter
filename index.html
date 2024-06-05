@@ -95,13 +95,124 @@
       let firstNum = document.querySelector('#first-num').value;
       let secondNum = document.querySelector('#second-num').value;
       let operator = document.querySelector('#operator').value;
-      output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      try {
+        if (isNaN(firstNum) || isNaN(secondNum)) {
+          throw new CustomError('Input is not a number');
+        }
+        output.innerHTML = eval(`${firstNum} ${operator} ${secondNum}`);
+      } catch (error) {
+        output.innerHTML = error.message;
+        console.error(error.name + ': ' + error.message);
+      } finally {
+        console.log('Calculation attempted');
+      }
     });
+
+    class CustomError extends Error {
+      constructor(message) {
+        super(message);
+        this.name = 'CustomError';
+      }
+    }
 
     let errorBtns = Array.from(document.querySelectorAll('#error-btns > button'));
 
-    // Start your code here
-    // You may move this JS to another file if you wish
+    errorBtns.forEach(btn => {
+      btn.addEventListener('click', () => {
+        switch (btn.innerText) {
+          case 'Console Log':
+            console.log('This is a console log message');
+            break;
+          case 'Console Error':
+            console.error('This is a console error message');
+            break;
+          case 'Console Count':
+            console.count('Count');
+            break;
+          case 'Console Warn':
+            console.warn('This is a console warning');
+            break;
+          case 'Console Assert':
+            console.assert(false, 'Console assertion failed');
+            break;
+          case 'Console Clear':
+            console.clear();
+            break;
+          case 'Console Dir':
+            console.dir(btn);
+            break;
+          case 'Console dirxml':
+            console.dirxml(btn);
+            break;
+          case 'Console Group Start':
+            console.group('Console Group');
+            console.log('Inside group');
+            break;
+          case 'Console Group End':
+            console.groupEnd();
+            break;
+          case 'Console Table':
+            console.table([{ name: 'Alice', age: 25 }, { name: 'Bob', age: 30 }]);
+            break;
+          case 'Start Timer':
+            console.time('Timer');
+            break;
+          case 'End Timer':
+            console.timeEnd('Timer');
+            break;
+          case 'Console Trace':
+            deep();
+            break;
+          case 'Trigger a Global Error':
+            try {
+              boom; // Reference to a non-existent variable, causing a ReferenceError
+            } catch (error) {
+              const customError = new ReferenceError('Uncaught ReferenceError: boom is not defined');
+              window.onerror(customError.message, '', 0, 0, customError);
+            }
+            break;
+        }
+      });
+    });
+
+    function deep() {
+      deeper();
+    }
+
+    function deeper() {
+      handleButtonClick();
+    }
+
+    function handleButtonClick() {
+      console.trace('deepest');
+    }
+
+    window.onerror = function(message, source, lineno, colno, error) {
+      console.error('Global Error Caught: ' + message);
+
+      const errorDetails = {
+        message,
+        source,
+        lineno,
+        colno,
+        error: error ? error.stack : null
+      };
+
+      fetch('https://your-server-endpoint.com/log-error', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(errorDetails)
+      }).then(response => {
+        if (!response.ok) {
+          throw new Error('Failed to log error');
+        }
+        console.log('Error logged successfully');
+      }).catch(err => {
+        console.error('Error logging failed:', err);
+      });
+    };
   </script>
 </body>
 
